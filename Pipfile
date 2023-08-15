@@ -16,7 +16,7 @@ flask-bcrypt = "*"
 psycopg2-binary = "*"
 gunicorn = "*"
 werkzeug = "*"
-python-dotenv = "==0.21.1"
+python-dotenv = "*"
 
 [dev-packages]
 
