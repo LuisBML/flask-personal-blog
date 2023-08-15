@@ -20,14 +20,12 @@
 <main class="mb-4">
   <div class="container">
     <div class="row">
-      <!-- TODO: add a flash message here for users registering twice -->
+      <!-- Fash message here for users registering twice -->
       <div class="col-lg-8 col-md-10 mx-auto">
         <h1>Log In</h1>
         {% for mesg in get_flashed_messages() %}
         <p class="flash">{{ mesg }}</p>
-        {% endfor %}
-        <!--TODO: render login form here-->
-        {{ render_form(form, novalidate=True) }}
+        {% endfor %} {{ render_form(form, novalidate=True) }}
       </div>
     </div>
   </div>

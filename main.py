@@ -1,25 +1,10 @@
 from datetime import date
-from flask import Flask, render_template, redirect, url_for, flash
-from flask_bootstrap import Bootstrap5
-from flask_ckeditor import CKEditor
-from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
-from flask_sqlalchemy import SQLAlchemy
-from flask_bcrypt import Bcrypt
-from functools import wraps
-from sqlalchemy.orm import relationship
+from flask import render_template, redirect, url_for, flash
+from flask_login import login_user, current_user, logout_user
 from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
-import os
-
-app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv("FLASK_KEY")
-ckeditor = CKEditor(app)
-Bootstrap5(app)
-
-# TODO: Configure Flask-Login
-login_manager = LoginManager()
-login_manager.init_app(app)
-bcrypt = Bcrypt()
-bcrypt.init_app(app)
+from functools import wraps
+from models import User, Comment, BlogPost
+from app import create_app, db, login_manager, bcrypt
 
 
 def only_admin(func):
@@ -36,72 +21,20 @@ def is_admin():
         return True
     return False
 
+
 # load_user callback
-
-
 @login_manager.user_loader
 def load_user(user_id):
     user = db.session.get(User, user_id)
     return user if user else None
 
 
-# CONNECT TO DB
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
-    "DB_URI", "sqlite:///blog.db")
-db = SQLAlchemy()
-db.init_app(app)
-
-
-# CONFIGURE TABLES
-class BlogPost(db.Model):
-    __tablename__ = "blog_posts"
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(250), unique=True, nullable=False)
-    subtitle = db.Column(db.String(250), nullable=False)
-    date = db.Column(db.String(250), nullable=False)
-    body = db.Column(db.Text, nullable=False)
-    img_url = db.Column(db.String(250), nullable=False)
-    # Create reference to the User object
-    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    author = relationship("User", back_populates="posts")
-    comments = relationship("Comment", back_populates="parent_post",
-                            cascade="all, delete", passive_deletes=True)
-
-
-class Comment(db.Model):
-    __tablename__ = "comments"
-    id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.Text, nullable=False)
-    # Create reference to the User object
-    author_id = db.Column(db.Integer, db.ForeignKey(
-        "users.id", ondelete="CASCADE"))
-    author = relationship("User", back_populates="comments")
-    # Create reference to the BlogPost object
-    post_id = db.Column(db.Integer, db.ForeignKey(
-        "blog_posts.id", ondelete="CASCADE"))
-    parent_post = relationship("BlogPost", back_populates="comments")
-
-
-class User(UserMixin, db.Model):
-    __tablename__ = "users"
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
-    name = db.Column(db.String(1000), nullable=False)
-    # These will act like a List of BlogPost and Comment objects
-    posts = relationship("BlogPost", back_populates="author")
-    comments = relationship("Comment", back_populates="author",
-                            cascade="all, delete", passive_deletes=True)
-
-    def __str__(self) -> str:
-        return self.name
-
+app = create_app()
 
 with app.app_context():
     db.create_all()
 
 
-# TODO: Use Werkzeug to hash the user's password when creating a new user.
 @app.route('/register', methods=["POST", "GET"])
 def register():
     if current_user.is_authenticated:
@@ -132,7 +65,6 @@ def register():
     return render_template("register.html", form=register_form, authenticated=False)
 
 
-# TODO: Retrieve a user from the database based on their email.
 @app.route('/login', methods=["POST", "GET"])
 def login():
     if current_user.is_authenticated:
@@ -164,7 +96,6 @@ def get_all_posts():
     return render_template("index.html", all_posts=posts, authenticated=current_user.is_authenticated, user_admin=is_admin())
 
 
-# TODO: Allow logged-in users to comment on posts
 @app.route("/post/<int:post_id>", methods=["POST", "GET"])
 def show_post(post_id):
     requested_post = db.get_or_404(BlogPost, post_id)
@@ -238,7 +169,6 @@ def about():
 # @app.route("/contact")
 # def contact():
 #     return render_template("contact.html", authenticated=current_user.is_authenticated)
-
 
 if __name__ == "__main__":
     app.run(debug=True)
