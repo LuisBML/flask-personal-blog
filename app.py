@@ -5,6 +5,10 @@ from flask_login import LoginManager
 from flask_bootstrap import Bootstrap5
 from flask_ckeditor import CKEditor
 import os
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 # Configure Flask-Login
 login_manager = LoginManager()

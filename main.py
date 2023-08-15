@@ -171,4 +171,4 @@ def about():
 #     return render_template("contact.html", authenticated=current_user.is_authenticated)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)

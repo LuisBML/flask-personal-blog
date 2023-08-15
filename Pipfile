@@ -13,10 +13,10 @@ flask-ckeditor = "*"
 flask-sqlalchemy = "*"
 flask-login = "*"
 flask-bcrypt = "*"
-werkzeug = "*"
 psycopg2-binary = "*"
 gunicorn = "*"
-python-dotenv = "*"
+werkzeug = "*"
+python-dotenv = "==0.21.1"
 
 [dev-packages]
 
