@@ -36,9 +36,9 @@ class Comment(db.Model):
 class User(UserMixin, db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(250), unique=True, nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(300), nullable=False)
-    name = db.Column(db.String(250), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
     # These will act like a List of BlogPost and Comment objects
     posts = relationship("BlogPost", back_populates="author")
     comments = relationship("Comment", back_populates="author",
